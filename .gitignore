@@ -6,4 +6,5 @@ venv/
 .coverage
 *.pkl
 *.joblib
-.env
+.envkubectl
+minikube-linux-amd64
