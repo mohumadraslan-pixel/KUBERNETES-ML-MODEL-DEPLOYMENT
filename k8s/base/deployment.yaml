@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-api-deployment
+  namespace: ml-system
+  labels:
+    app: ml-api
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ml-api
+  template:
+    metadata:
+      labels:
+        app: ml-api
+        version: v1
+    spec:
+      containers:
+      - name: ml-api
+        image: ml-api:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 5000
+          protocol: TCP
+        
+        # Resource limits and requests
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # Liveness probe (restart if unhealthy)
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+          successThreshold: 1
+        
+        # Readiness probe (remove from service if not ready)
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+          successThreshold: 1
+        
+        # Environment variables
+        env:
+        - name: PORT
+          value: "5000"
+        - name: MODEL_PATH
+          value: "iris_model.joblib"
+        - name: LOG_LEVEL
+          value: "INFO"
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000

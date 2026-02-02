@@ -1,0 +1,106 @@
+{
+  "dashboard": {
+    "title": "ML API Monitoring Dashboard",
+    "tags": ["ml", "kubernetes", "api"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(ml_predictions_total[5m])",
+            "legendFormat": "Predictions/sec"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Pod Count",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "count(kube_pod_info{namespace='ml-system', pod=~'ml-api.*'})"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Average Latency",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "rate(ml_prediction_duration_seconds_sum[5m]) / rate(ml_prediction_duration_seconds_count[5m])"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "CPU Usage by Pod",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{namespace='ml-system', pod=~'ml-api.*'}[5m])",
+            "legendFormat": "{{pod}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage by Pod",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{namespace='ml-system', pod=~'ml-api.*'}",
+            "legendFormat": "{{pod}}"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Prediction Distribution",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 16, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "sum by (class) (ml_predictions_total)"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Error Rate",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 16, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(ml_errors_total[5m])",
+            "legendFormat": "{{type}}"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "HPA Status",
+        "type": "table",
+        "gridPos": {"x": 16, "y": 16, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "kube_horizontalpodautoscaler_status_current_replicas{namespace='ml-system'}"
+          }
+        ]
+      }
+    ],
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}
